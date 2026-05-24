@@ -1,2 +1,0 @@
-# kurumi22
-list
