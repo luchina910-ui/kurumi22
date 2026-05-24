@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ГИС УК «ВСЕ СВОИ»</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="map"></div>
+
+  <!-- Эко-панель -->
+  <div class="eco-panel" id="ecoPanel">
+    <div class="eco-header" onclick="toggleEcoPanel()">
+      <span class="eco-icon">🌿</span>
+      <span class="eco-title">Экосистема</span>
+      <span class="eco-arrow" id="ecoArrow">▼</span>
+    </div>
+    <div class="eco-content" id="ecoContent">
+      <div class="eco-row" data-layer="houses">
+        <label class="switch">
+          <input type="checkbox" checked onchange="toggleLayer('houses', this.checked)">
+          <span class="slider"></span>
+        </label>
+        <span>Дома</span>
+      </div>
+      <div class="eco-row" data-layer="trash">
+        <label class="switch">
+          <input type="checkbox" checked onchange="toggleLayer('trash', this.checked)">
+          <span class="slider"></span>
+        </label>
+        <span>Мусорные баки</span>
+      </div>
+      <div class="eco-row" data-layer="tko">
+        <label class="switch">
+          <input type="checkbox" checked onchange="toggleLayer('tko', this.checked)">
+          <span class="slider"></span>
+        </label>
+        <span>ТКО</span>
+      </div>
+      <div class="eco-row" data-layer="parking">
+        <label class="switch">
+          <input type="checkbox" checked onchange="toggleLayer('parking', this.checked)">
+          <span class="slider"></span>
+        </label>
+        <span>Парковки</span>
+      </div>
+      <div class="eco-row" data-layer="playground">
+        <label class="switch">
+          <input type="checkbox" checked onchange="toggleLayer('playground', this.checked)">
+          <span class="slider"></span>
+        </label>
+        <span>Детские площадки</span>
+      </div>
+      <div class="eco-row" data-layer="truck">
+        <label class="switch">
+          <input type="checkbox" checked onchange="toggleLayer('truck', this.checked)">
+          <span class="slider"></span>
+        </label>
+        <span>Спецтехника</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Кнопка настроек -->
+  <button class="settings-btn" onclick="toggleSettings()" title="Настройки">
+    ⚙️
+  </button>
+
+  <!-- Модалка настроек -->
+  <div class="modal" id="settingsModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Настройки</h2>
+        <button class="close-btn" onclick="closeModal('settingsModal')">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="setting-row">
+          <span>Тёмная тема</span>
+          <label class="switch">
+            <input type="checkbox" id="darkThemeToggle" onchange="toggleDarkTheme()">
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div class="setting-row">
+          <span>Доп. настройки</span>
+          <label class="switch">
+            <input type="checkbox" id="extraSettingsToggle" onchange="toggleExtraSettings()">
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div class="extra-settings" id="extraSettings">
+          <button class="neon-btn" onclick="openQRModal()">QR КОД</button>
+          <button class="neon-btn" onclick="openModal('additionalModal')">ДОП</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Основная модалка -->
+  <div class="modal" id="mainModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="modalTitle">Заголовок</h2>
+        <button class="close-btn" onclick="closeModal('mainModal')">×</button>
+      </div>
+      <div class="modal-body" id="modalBody">
+        <!-- Динамический контент -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Под-модалка -->
+  <div class="modal sub-modal" id="subModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="subModalTitle">Подзаголовок</h2>
+        <button class="close-btn" onclick="closeModal('subModal')">×</button>
+      </div>
+      <div class="modal-body" id="subModalBody">
+        <!-- Динамический контент -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Модалка QR -->
+  <div class="modal" id="qrModal">
+    <div class="modal-content qr-content">
+      <div class="modal-header">
+        <h2>QR Код</h2>
+        <button class="close-btn" onclick="closeModal('qrModal')">×</button>
+      </div>
+      <div class="modal-body">
+        <img src="/qrcod_e68S.jpg" alt="QR Код" class="qr-image" onclick="zoomQR(this)">
+        <p class="qr-hint">Нажмите на изображение для увеличения</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Модалка камеры -->
+  <div class="modal" id="cameraModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Камера наблюдения</h2>
+        <button class="close-btn" onclick="closeModal('cameraModal')">×</button>
+      </div>
+      <div class="modal-body camera-body">
+        <div class="loader" id="cameraLoader"></div>
+        <div class="camera-placeholder" id="cameraPlaceholder" style="display:none;">
+          <p>Видеопоток загружен</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Модалка успеха -->
+  <div class="modal success-modal" id="successModal">
+    <div class="modal-content success-content">
+      <div class="success-icon">✓</div>
+      <h3>Жалоба отправлена!</h3>
+      <p id="ticketNumber">Тикет: Ж-0000</p>
+      <button class="btn-primary" onclick="closeModal('successModal')">Закрыть</button>
+    </div>
+  </div>
+
+  <!-- Модалка эко-гида -->
+  <div class="modal" id="ecoGuideModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Эко-гид</h2>
+        <button class="close-btn" onclick="closeModal('ecoGuideModal')">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="eco-guide-item">
+          <span class="eco-level green">&lt;33%</span>
+          <span>Низкая заполненность</span>
+        </div>
+        <div class="eco-guide-item">
+          <span class="eco-level orange">&lt;66%</span>
+          <span>Средняя заполненность</span>
+        </div>
+        <div class="eco-guide-item">
+          <span class="eco-level red">&gt;66%</span>
+          <span>Высокая заполненность</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Доп. модалка -->
+  <div class="modal" id="additionalModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Дополнительные настройки</h2>
+        <button class="close-btn" onclick="closeModal('additionalModal')">×</button>
+      </div>
+      <div class="modal-body">
+        <p>Здесь будут дополнительные настройки системы</p>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://api-maps.yandex.ru/2.1/?apikey=&lang=ru_RU"></script>
+  <script src="script.js"></script>
+</body>
+</html>
